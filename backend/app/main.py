@@ -1,4 +1,4 @@
-# FastAPI app entry - CORS, routers, startup
+# FastAPI app entry - CORS, routers, static frontend
 # Ensure backend dir is on path so "app" is found when run from any cwd
 import sys
 from pathlib import Path
@@ -11,10 +11,14 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.database import engine, Base
 from app import models  # noqa: F401 - register models with Base
 from app.routes import interviewers, candidates, selection, match
+
+# Directory for React production build (copy frontend/dist here for deployment)
+STATIC_DIR = _backend / "static"
 
 
 @asynccontextmanager
@@ -33,22 +37,27 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS for React frontend
+# CORS: same-origin in prod; allow dev origins and any origin for hackathon
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mount routes
-app.include_router(interviewers.router)
-app.include_router(candidates.router)
-app.include_router(selection.router)
-app.include_router(match.router)
+# API routes under /api (frontend uses BASE = '/api')
+app.include_router(interviewers.router, prefix="/api")
+app.include_router(candidates.router, prefix="/api")
+app.include_router(selection.router, prefix="/api")
+app.include_router(match.router, prefix="/api")
 
-
-@app.get("/")
-def root():
-    return {"message": "AI Interviewer Matching API", "docs": "/docs"}
+# Serve React production build: "/" -> index.html, "/assets/*" -> static assets
+# Mount static last so /api takes precedence
+if STATIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="frontend")
+else:
+    # No static build: still serve API and a simple root message (e.g. dev backend-only)
+    @app.get("/")
+    def root():
+        return {"message": "AI Interviewer Matching API", "docs": "/docs"}

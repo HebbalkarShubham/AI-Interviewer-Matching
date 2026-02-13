@@ -28,5 +28,6 @@ Thumbs.db
 *.log
 dist/
 build/
+backend/static/
 *.egg-info/
 .eggs/
