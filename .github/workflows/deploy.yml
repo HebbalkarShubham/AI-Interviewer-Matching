@@ -1,5 +1,6 @@
 # EC2 deployment: build frontend, sync to server, restart app (run.sh).
 # Requires GitHub secrets: EC2_HOST, EC2_SSH_KEY (base64 of .pem); optional: EC2_USER.
+# Optional: EC2_ENV_FILE = base64 of backend/.env (so S3 + SMTP work on EC2). See backend/.env.example.
 
 name: Deploy to EC2
 
@@ -56,6 +57,7 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_ENV_FILE: ${{ secrets.EC2_ENV_FILE }}
         run: |
           if [ -z "$EC2_HOST" ] || [ -z "$EC2_SSH_KEY" ]; then
             echo "::error::EC2_HOST or EC2_SSH_KEY secret not set."
@@ -83,6 +85,14 @@ jobs:
             --exclude 'frontend/node_modules' \
             --exclude '.git' \
             ./ "$USER@$EC2_HOST:~/AI-Interviewer-Matching/"
+
+          if [ -n "$EC2_ENV_FILE" ]; then
+            echo "Writing backend/.env on EC2 from EC2_ENV_FILE secret..."
+            echo "$EC2_ENV_FILE" | base64 -d | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "$USER@$EC2_HOST" "cat > ~/AI-Interviewer-Matching/backend/.env"
+            echo "backend/.env updated (S3, SMTP, etc. will be loaded)."
+          else
+            echo "::notice::EC2_ENV_FILE not set. S3 and email require backend/.env on EC2. Create it manually or add repo secret EC2_ENV_FILE (base64 of .env)."
+          fi
 
           echo "Restarting app on EC2..."
           if ! ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "$USER@$EC2_HOST" \
