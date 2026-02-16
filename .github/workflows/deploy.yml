@@ -1,5 +1,5 @@
-# Deploy to EC2 on push to main: build frontend, sync to server, restart app.
-# No Docker. Requires GitHub secrets: EC2_HOST, EC2_SSH_KEY (base64 of .pem); optional: EC2_USER.
+# EC2 deployment: build frontend, sync to server, restart app (run.sh).
+# Requires GitHub secrets: EC2_HOST, EC2_SSH_KEY (base64 of .pem); optional: EC2_USER.
 
 name: Deploy to EC2
 

@@ -1,4 +1,6 @@
 # Matching service: find_best_interviewers by skills only (ORM only)
+from typing import Any, Dict, List
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.models import Interviewer, InterviewerSkill
@@ -10,9 +12,9 @@ def _normalize_skill(s: str) -> str:
 
 def find_best_interviewers(
     db: Session,
-    required_skills: list[str],
+    required_skills: List[str],
     top_n: int = 5,
-) -> list[dict]:
+) -> List[Dict[str, Any]]:
     """
     Find top interviewers by:
     - having at least one required skill

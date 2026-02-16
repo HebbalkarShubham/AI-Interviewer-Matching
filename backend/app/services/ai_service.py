@@ -3,6 +3,8 @@ import base64
 import json
 import logging
 import re
+from typing import Any, Dict, List, Optional
+
 from openai import OpenAI
 
 from app.config import settings
@@ -58,7 +60,7 @@ def extract_text_with_vision(file_bytes: bytes, mime_type: str) -> str:
         return ""
 
 
-def _extract_skills_fallback(resume_text: str) -> list[dict]:
+def _extract_skills_fallback(resume_text: str) -> List[Dict[str, Any]]:
     """
     When OpenAI is unavailable (quota, key missing), extract skills by matching
     common tech/professional terms in the resume. Returns same format as AI.
@@ -78,7 +80,7 @@ def _extract_skills_fallback(resume_text: str) -> list[dict]:
     return found
 
 
-def _normalize_skill_item(item) -> dict | None:
+def _normalize_skill_item(item: Any) -> Optional[Dict[str, Any]]:
     """Convert API response item to {skill, confidence}. Handles 'skill' or 'name' key, or plain string."""
     if isinstance(item, str) and item.strip():
         return {"skill": item.strip(), "confidence": None}
@@ -164,7 +166,7 @@ Resume text:
     return {"name": None, "email": fallback_email}
 
 
-def extract_skills_from_resume(resume_text: str) -> list[dict]:
+def extract_skills_from_resume(resume_text: str) -> List[Dict[str, Any]]:
     """
     Use OpenAI to extract skills from resume text.
     If API fails (e.g. 429 quota) or key is missing, falls back to keyword matching.
@@ -173,7 +175,7 @@ def extract_skills_from_resume(resume_text: str) -> list[dict]:
     if not resume_text or not resume_text.strip():
         return []
 
-    def use_fallback(reason: str) -> list[dict]:
+    def use_fallback(reason: str) -> List[Dict[str, Any]]:
         logging.warning("Using fallback skill extraction: %s", reason)
         return _extract_skills_fallback(resume_text)
 
@@ -218,7 +220,7 @@ Resume text:
         return use_fallback(str(e))
 
 
-def explain_match(candidate_skills: list[str], interviewer_skills: list[str], score: float) -> str:
+def explain_match(candidate_skills: List[str], interviewer_skills: List[str], score: float) -> str:
     """
     Generate a short AI explanation for why this interviewer matches the candidate.
     """

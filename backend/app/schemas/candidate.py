@@ -1,30 +1,32 @@
-# Pydantic schemas for Candidate and Matching (Python 3.14 compatible)
+# Pydantic schemas for Candidate and Matching (Python 3.9 compatible)
 from __future__ import annotations
+
+from typing import List, Optional
 
 from pydantic import BaseModel
 
 
 class CandidateSkillResponse(BaseModel):
     skill: str
-    confidence: float | None = None
+    confidence: Optional[float] = None
 
     class Config:
         from_attributes = True
 
 
 class CandidateCreate(BaseModel):
-    name: str | None = None
-    email: str | None = None
+    name: Optional[str] = None
+    email: Optional[str] = None
 
 
 class CandidateResponse(BaseModel):
     id: int
-    name: str | None
-    email: str | None
-    resume_text: str | None = None  # extracted text only
-    resume_path: str | None = None  # S3 path for resume file
-    resume_download_url: str | None = None  # presigned URL when S3 configured
-    skills: list[CandidateSkillResponse] = []
+    name: Optional[str] = None
+    email: Optional[str] = None
+    resume_text: Optional[str] = None  # extracted text only
+    resume_path: Optional[str] = None  # S3 path for resume file
+    resume_download_url: Optional[str] = None  # presigned URL when S3 configured
+    skills: List[CandidateSkillResponse] = []
 
     class Config:
         from_attributes = True
@@ -37,8 +39,8 @@ class MatchResult(BaseModel):
     email: str
     skills: str
     score: float  # 0-100
-    matched_skills: list[str]
-    explanation: str | None = None
+    matched_skills: List[str]
+    explanation: Optional[str] = None
 
 
 class MatchExplanation(BaseModel):

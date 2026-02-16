@@ -1,4 +1,6 @@
 # Candidate API - upload resume to S3, extract skills, get matches
+from typing import List, Optional
+
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session, joinedload
 
@@ -44,8 +46,8 @@ def candidate_to_response(c: Candidate) -> CandidateResponse:
 @router.post("/upload", response_model=CandidateResponse)
 async def upload_resume(
     file: UploadFile = File(...),
-    name: str | None = Form(None),
-    email: str | None = Form(None),
+    name: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),
     db: Session = Depends(get_db),
 ):
     """
@@ -112,7 +114,7 @@ def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
     return candidate_to_response(c)
 
 
-@router.get("/{candidate_id}/matches", response_model=list[MatchResult])
+@router.get("/{candidate_id}/matches", response_model=List[MatchResult])
 def get_matches(candidate_id: int, db: Session = Depends(get_db)):
     """
     Get ranked list of interviewers matched to this candidate.

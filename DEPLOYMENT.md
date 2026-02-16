@@ -1,6 +1,8 @@
-# EC2 deployment (single server, no Docker)
+# EC2 deployment
 
 Deploy React + FastAPI on one AWS EC2 instance, port 8000. Frontend and backend are served together; no CORS issues.
+
+**→ First time setting up the environment on EC2?** Use **[EC2_SETUP_GUIDE.md](EC2_SETUP_GUIDE.md)** for a single, step-by-step checklist (from “open EC2 terminal” to “app running”).
 
 ---
 
@@ -173,7 +175,7 @@ So everything (frontend + backend) is on port 8000. Start with: **`bash run.sh`*
 
 ## H. Automated pipeline (GitHub Actions)
 
-On every **push to `main`**, the workflow builds the frontend and deploys to EC2.
+On every **push to the deployment branch**, the workflow builds the frontend and deploys to EC2.
 
 **What it does:**
 1. Checkout code, install frontend deps, run `npm run build`
@@ -193,7 +195,7 @@ On every **push to `main`**, the workflow builds the frontend and deploys to EC2
 
 **Manual run:** Actions → Deploy to EC2 → Run workflow.
 
-**Branch:** Default trigger is `main`. To use another branch, edit `.github/workflows/deploy.yml` and change `branches: [main]`.
+**Branch:** Trigger is set in `.github/workflows/deploy.yml` (e.g. `branches: [deployment]`). Change it there if you use a different branch.
 
 ---
 
