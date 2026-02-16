@@ -85,6 +85,8 @@ jobs:
             ./ "$USER@$EC2_HOST:~/AI-Interviewer-Matching/"
 
           echo "Restarting app on EC2..."
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "$USER@$EC2_HOST" \
-            "cd ~/AI-Interviewer-Matching && (pkill -f 'uvicorn app.main:app' || true); sleep 2; nohup bash run.sh >> app.log 2>&1 &"
+          if ! ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "$USER@$EC2_HOST" \
+            "cd ~/AI-Interviewer-Matching && (pkill -f 'uvicorn app.main:app' || true); sleep 2; nohup bash run.sh >> app.log 2>&1 & sleep 1"; then
+            echo "::warning::Restart command failed (exit 255). Code was synced. SSH to EC2 and run: cd AI-Interviewer-Matching && nohup bash run.sh >> app.log 2>&1 &"
+          fi
           echo "Deploy done. App at http://$EC2_HOST:8000"
