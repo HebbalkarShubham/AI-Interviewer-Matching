@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 from pathlib import Path
+from typing import List, Optional, Union
 
 from app.config import settings
 
@@ -14,8 +15,8 @@ def send_email(
     to_email: str,
     subject: str,
     body_html: str,
-    attachment_path: str | Path | None = None,
-    attachment_filename: str | None = None,
+    attachment_path: Optional[Union[str, Path]] = None,
+    attachment_filename: Optional[str] = None,
 ) -> bool:
     """
     Send email via SMTP. Returns True on success.
@@ -55,14 +56,14 @@ def send_interviewer_selection_email(
     interviewer_email: str,
     interviewer_name: str,
     candidate_name: str,
-    candidate_email: str | None,
+    candidate_email: Optional[str],
     *,
-    candidate_skills: list[str] | str = (),
+    candidate_skills: Union[List[str], str] = (),
     match_score: float = 0.0,
-    matched_skills: list[str] | str = (),
-    resume_text: str | None = None,
-    resume_file_path: str | Path | None = None,
-    resume_download_url: str | None = None,
+    matched_skills: Union[List[str], str] = (),
+    resume_text: Optional[str] = None,
+    resume_file_path: Optional[Union[str, Path]] = None,
+    resume_download_url: Optional[str] = None,
 ) -> bool:
     """Send notification to interviewer with candidate details and resume (text + optional S3 download link)."""
     subject = f"Interview Assignment: Candidate {candidate_name or 'Unknown'}"

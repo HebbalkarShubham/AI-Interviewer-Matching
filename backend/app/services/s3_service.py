@@ -2,6 +2,7 @@
 import logging
 import uuid
 from pathlib import Path
+from typing import Optional
 
 from app.config import settings
 
@@ -25,7 +26,7 @@ def is_s3_configured() -> bool:
     return bool(settings.S3_BUCKET)
 
 
-def upload_resume_to_s3(content: bytes, filename: str, content_type: str | None = None) -> str | None:
+def upload_resume_to_s3(content: bytes, filename: str, content_type: Optional[str] = None) -> Optional[str]:
     """
     Upload resume file to S3. Returns the S3 object key on success, None on failure.
     Key format: resumes/{uuid}/{sanitized_filename}
@@ -54,7 +55,7 @@ def upload_resume_to_s3(content: bytes, filename: str, content_type: str | None 
         return None
 
 
-def get_presigned_download_url(s3_key: str, expires_in: int = 3600) -> str | None:
+def get_presigned_download_url(s3_key: str, expires_in: int = 3600) -> Optional[str]:
     """
     Generate a presigned URL to download the resume. Returns None if S3 not configured or key missing.
     Default expiry 1 hour; use 86400 for 24 hours in emails.

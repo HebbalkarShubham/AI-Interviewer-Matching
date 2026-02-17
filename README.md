@@ -40,9 +40,10 @@ pip install -r requirements.txt
 
 Copy `.env.example` to `.env` and set:
 
-- `MYSQL_*` – your MySQL credentials (host, port, user, password, database)
+- `DATABASE_URL` – MySQL connection string (e.g. `mysql+pymysql://user:password@host:3306/dbname`)
 - `OPENAI_API_KEY` – required for skill extraction and explanations
-- `SMTP_*` – optional, for sending email when interviewer is selected
+- `SMTP_*`, `EMAIL_FROM` – optional, for sending email when interviewer is selected
+- `AWS_*`, `S3_BUCKET` – optional, for storing resumes on S3
 
 Run the API:
 
@@ -99,3 +100,11 @@ frontend/
 - `GET /candidates/{id}` – get candidate
 - `GET /candidates/{id}/matches` – ranked match results with score and explanation
 - `POST /selection/select` – body: `candidate_id`, `interviewer_id`, `send_email`; sends email to interviewer
+
+## Deploying to EC2
+
+The GitHub workflow (`.github/workflows/deploy.yml`) syncs code to EC2 but **excludes** `backend/.env` for security. So S3 uploads and email **will not work** on EC2 until the server has a `backend/.env` file.
+
+**Option A – Manual:** SSH to EC2 and create `~/AI-Interviewer-Matching/backend/.env` with the same variables as locally (e.g. `DATABASE_URL`, `OPENAI_API_KEY`, `SMTP_*`, `EMAIL_FROM`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET`, `AWS_REGION`). Then restart the app (or redeploy).
+
+**Option B – GitHub secret:** Encode your local `.env` as base64 (e.g. `base64 -w0 backend/.env` on Linux, or use an online encoder) and add a repository secret **EC2_ENV_FILE** with that value. On each deploy, the workflow will write it to `backend/.env` on the server so S3 and email work without manual SSH.

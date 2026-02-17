@@ -1,4 +1,6 @@
 # POST /match - find best interviewers by skills only
+from typing import List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -9,7 +11,7 @@ from app.services.matching import find_best_interviewers
 router = APIRouter(prefix="/match", tags=["match"])
 
 
-@router.post("", response_model=list[MatchResultItem])
+@router.post("", response_model=List[MatchResultItem])
 def match_interviewers(
     body: MatchRequest,
     db: Session = Depends(get_db),

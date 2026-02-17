@@ -1,4 +1,6 @@
 # Interviewer CRUD API - skills only (no availability)
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session, joinedload
@@ -42,7 +44,7 @@ def _interviewer_to_response(inv: Interviewer) -> InterviewerResponse:
     )
 
 
-@router.get("", response_model=list[InterviewerResponse])
+@router.get("", response_model=List[InterviewerResponse])
 def list_interviewers(db: Session = Depends(get_db)):
     """List all interviewers with skills."""
     interviewers = (

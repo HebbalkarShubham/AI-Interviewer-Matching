@@ -1,6 +1,8 @@
 # Pydantic schemas for Interviewer API (skills only, no availability)
 from __future__ import annotations
 
+from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -20,29 +22,29 @@ class InterviewerSkillResponse(BaseModel):
 class InterviewerCreate(BaseModel):
     name: str
     email: str
-    level: str | None = None
-    experience_range: str | None = None  # e.g. "0-2", "3-5", "5-10"
-    skills: list[InterviewerSkillCreate] = []
+    level: Optional[str] = None
+    experience_range: Optional[str] = None  # e.g. "0-2", "3-5", "5-10"
+    skills: List[InterviewerSkillCreate] = []
 
 
 class InterviewerResponse(BaseModel):
     id: int
     name: str
     email: str
-    level: str | None
-    experience_range: str | None
-    skills: list[InterviewerSkillResponse] = []
+    level: Optional[str] = None
+    experience_range: Optional[str] = None
+    skills: List[InterviewerSkillResponse] = []
 
     model_config = ConfigDict(from_attributes=True)
 
 
 # --- Match endpoint schemas (skills only) ---
 class MatchRequest(BaseModel):
-    skills: list[str]
+    skills: List[str]
 
 
 class MatchResultItem(BaseModel):
     name: str
     email: str
     score: int
-    matched_skills: list[str]
+    matched_skills: List[str]

@@ -1,6 +1,8 @@
 # Candidate-based matching: score candidate vs each interviewer by skill overlap (ORM)
 # Used by GET /candidates/{id}/matches. Interviewer now has .skills as relationship.
 import re
+from typing import Dict, List, Tuple, Any
+
 from app.models import Interviewer
 from app.models.candidate import Candidate
 from app.services.ai_service import explain_match
@@ -10,7 +12,7 @@ def normalize_skill(s: str) -> str:
     return s.lower().strip() if s else ""
 
 
-def get_interviewer_skill_list(interviewer: Interviewer) -> list[str]:
+def get_interviewer_skill_list(interviewer: Interviewer) -> List[str]:
     """Get list of skill names from interviewer (new: InterviewerSkill relationship)."""
     if hasattr(interviewer, "skills"):
         # New model: interviewer.skills is list of InterviewerSkill
@@ -29,11 +31,11 @@ def get_interviewer_skills_display(interviewer: Interviewer) -> str:
     return ", ".join(names) if names else ""
 
 
-def get_candidate_skill_list(candidate: Candidate) -> list[str]:
+def get_candidate_skill_list(candidate: Candidate) -> List[str]:
     return [normalize_skill(s.skill) for s in candidate.skills]
 
 
-def compute_match_score(candidate_skills: list[str], interviewer_skills: list[str]) -> tuple[float, list[str]]:
+def compute_match_score(candidate_skills: List[str], interviewer_skills: List[str]) -> Tuple[float, List[str]]:
     if not candidate_skills:
         return 0.0, []
     cand_set = set(candidate_skills)
@@ -45,9 +47,9 @@ def compute_match_score(candidate_skills: list[str], interviewer_skills: list[st
 
 def get_ranked_matches(
     candidate: Candidate,
-    interviewers: list[Interviewer],
+    interviewers: List[Interviewer],
     include_explanation: bool = True,
-) -> list[dict]:
+) -> List[Dict[str, Any]]:
     """
     For a candidate, score against each interviewer by skill overlap.
     Works with new Interviewer model (skills as relationship).
