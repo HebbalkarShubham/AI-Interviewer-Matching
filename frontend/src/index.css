@@ -41,3 +41,117 @@ button {
 input, textarea {
   font-family: inherit;
 }
+
+/* React-DatePicker: match dark theme and Schedule & Send button (accent) */
+.schedule-datepicker-popper {
+  z-index: 1100 !important;
+}
+.schedule-datepicker-popper .react-datepicker,
+.schedule-datepicker-popper .react-datepicker__time-container {
+  background: var(--surface) !important;
+  border-color: var(--border);
+}
+.schedule-datepicker-popper .react-datepicker__time-list,
+.schedule-datepicker-popper .react-datepicker__time-box,
+.schedule-datepicker-popper ul.react-datepicker__time-list {
+  background: var(--surface) !important;
+  border-color: var(--border);
+}
+.schedule-datepicker,
+.schedule-timepicker {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.schedule-datepicker.react-datepicker-wrapper,
+.schedule-timepicker.react-datepicker-wrapper {
+  display: block;
+}
+.schedule-datepicker .react-datepicker__input-container input,
+.schedule-timepicker .react-datepicker__input-container input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  color: inherit;
+}
+.schedule-datepicker .react-datepicker__input-container input::placeholder {
+  color: var(--text-muted);
+}
+.schedule-datepicker-calendar.react-datepicker {
+  font-family: inherit;
+  background: var(--surface) !important;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.schedule-datepicker-calendar .react-datepicker__header {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text);
+}
+.schedule-datepicker-calendar .react-datepicker__current-month,
+.schedule-datepicker-calendar .react-datepicker__day-name {
+  color: var(--text);
+}
+.schedule-datepicker-calendar .react-datepicker__day {
+  color: var(--text);
+}
+.schedule-datepicker-calendar .react-datepicker__day:hover,
+.schedule-datepicker-calendar .react-datepicker__day--keyboard-selected {
+  background: var(--border);
+  color: var(--text);
+}
+.schedule-datepicker-calendar .react-datepicker__day--selected,
+.schedule-datepicker-calendar .react-datepicker__day--in-selecting-range {
+  background: var(--accent) !important;
+  color: white !important;
+}
+.schedule-datepicker-calendar .react-datepicker__day--disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+/* Time list: dark background, selected = accent (Schedule & Send color) */
+.schedule-datepicker-calendar .react-datepicker__time-list-item,
+.schedule-datepicker-popper .react-datepicker__time-list-item {
+  color: var(--text) !important;
+  background: transparent;
+}
+.schedule-datepicker-calendar .react-datepicker__time-list-item:hover,
+.schedule-datepicker-popper .react-datepicker__time-list-item:hover {
+  background: var(--border) !important;
+  color: var(--text);
+}
+.schedule-datepicker-calendar .react-datepicker__time-container .react-datepicker__time-box,
+.schedule-datepicker-popper .react-datepicker__time-box {
+  background: var(--surface) !important;
+  border-color: var(--border);
+}
+.schedule-datepicker-calendar .react-datepicker__time-list-item--selected,
+.schedule-datepicker-popper .react-datepicker__time-list-item--selected {
+  background: var(--accent) !important;
+  color: white !important;
+}
+.schedule-datepicker-calendar .react-datepicker__navigation {
+  top: 12px;
+}
+.schedule-datepicker-calendar .react-datepicker__navigation-icon::before {
+  border-color: var(--text-muted);
+}
+.schedule-datepicker-calendar .react-datepicker__month-dropdown-container,
+.schedule-datepicker-calendar .react-datepicker__year-dropdown-container {
+  background: var(--surface);
+  color: var(--text);
+}
+.schedule-datepicker-calendar select.react-datepicker__month-select,
+.schedule-datepicker-calendar select.react-datepicker__year-select {
+  background: var(--bg);
+  color: var(--text);
+  border-color: var(--border);
+}

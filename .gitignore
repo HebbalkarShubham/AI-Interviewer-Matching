@@ -31,3 +31,5 @@ build/
 backend/static/
 *.egg-info/
 .eggs/
+
+frontend/node_modules/

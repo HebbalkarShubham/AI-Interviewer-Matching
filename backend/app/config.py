@@ -27,6 +27,8 @@ class Settings:
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
     AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
     S3_BUCKET = os.getenv("S3_BUCKET", "")
+    # Base URL for links in emails (e.g. Accept/Reject interview) - no trailing slash
+    APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8000")
 
 
 settings = Settings()
