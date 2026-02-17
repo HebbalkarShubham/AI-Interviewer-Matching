@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.database import engine, Base
 from app import models  # noqa: F401 - register models with Base
-from app.routes import interviewers, candidates, selection, match
+from app.routes import interviewers, candidates, selection, match, interviews
 
 # Directory for React production build (copy frontend/dist here for deployment)
 STATIC_DIR = _backend / "static"
@@ -51,6 +51,7 @@ app.include_router(interviewers.router, prefix="/api")
 app.include_router(candidates.router, prefix="/api")
 app.include_router(selection.router, prefix="/api")
 app.include_router(match.router, prefix="/api")
+app.include_router(interviews.router, prefix="/api")
 
 # Serve React production build: "/" -> index.html, "/assets/*" -> static assets
 # Mount static last so /api takes precedence

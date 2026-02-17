@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getCandidate, getMatches, selectInterviewer } from '../api'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { getCandidate, getMatches, scheduleInterview } from '../api'
 
 export default function CandidateMatches() {
   const { id } = useParams()
@@ -8,9 +10,17 @@ export default function CandidateMatches() {
   const [matches, setMatches] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [selecting, setSelecting] = useState(null)
+  const [scheduleModalFor, setScheduleModalFor] = useState(null) // interviewer id when modal open
+  const [scheduleSending, setScheduleSending] = useState(false)
+  const [scheduleError, setScheduleError] = useState('')
   const [message, setMessage] = useState('')
   const [search, setSearch] = useState('')
+  // Form state for schedule modal (select only, no typing)
+  const [scheduleDate, setScheduleDate] = useState('')
+  const [scheduleTime, setScheduleTime] = useState('')
+  const [scheduleCustomMessage, setScheduleCustomMessage] = useState('')
+  const [scheduleDateObj, setScheduleDateObj] = useState(null)
+  const [scheduleTimeObj, setScheduleTimeObj] = useState(null)
 
   const filteredMatches = matches.filter((m) => {
     if (!search.trim()) return true
@@ -36,20 +46,60 @@ export default function CandidateMatches() {
     })()
   }, [id])
 
-  async function handleSelect(interviewerId, sendEmail = true) {
-    setSelecting(interviewerId)
-    setMessage('')
+  function openScheduleModal(interviewerId) {
+    setScheduleModalFor(interviewerId)
+    setScheduleDate('')
+    setScheduleTime('')
+    setScheduleDateObj(null)
+    setScheduleTimeObj(null)
+    setScheduleCustomMessage('')
+    setScheduleError('')
+  }
+
+  function closeScheduleModal() {
+    setScheduleModalFor(null)
+    setScheduleError('')
+  }
+
+  function getTodayISO() {
+    const d = new Date()
+    return d.toISOString().slice(0, 10)
+  }
+
+  async function handleScheduleAndSend() {
+    if (!scheduleDate.trim()) {
+      setScheduleError('Date is required.')
+      return
+    }
+    if (!scheduleTime.trim()) {
+      setScheduleError('Time is required.')
+      return
+    }
+    const chosen = new Date(`${scheduleDate}T${scheduleTime}`)
+    if (chosen < new Date()) {
+      setScheduleError('Cannot select a past date and time.')
+      return
+    }
+    setScheduleSending(true)
+    setScheduleError('')
     try {
-      const res = await selectInterviewer(Number(id), interviewerId, sendEmail)
+      const res = await scheduleInterview(
+        Number(id),
+        scheduleModalFor,
+        scheduleDate,
+        scheduleTime,
+        scheduleCustomMessage.trim() || null
+      )
       setMessage(
         res.email_sent
-          ? `Selected ${res.interviewer_name}. Email sent to ${res.interviewer_email}.`
-          : `Selected ${res.interviewer_name}. (Email not sent - check SMTP config.)`
+          ? `Interview scheduled for ${res.date} at ${res.time}. Email sent to ${res.interviewer_email}.`
+          : `Interview scheduled for ${res.date} at ${res.time}. (Email not sent - check SMTP config.)`
       )
+      closeScheduleModal()
     } catch (err) {
-      setMessage('Error: ' + (err.message || 'Failed'))
+      setScheduleError(err.message || 'Failed to schedule')
     } finally {
-      setSelecting(null)
+      setScheduleSending(false)
     }
   }
 
@@ -142,10 +192,9 @@ export default function CandidateMatches() {
                   borderRadius: 8,
                   fontWeight: 500,
                 }}
-                onClick={() => handleSelect(m.interviewer_id)}
-                disabled={selecting !== null}
+                onClick={() => openScheduleModal(m.interviewer_id)}
               >
-                {selecting === m.interviewer_id ? 'Sending…' : 'Select & Send Email'}
+                Send Email
               </button>
             </li>
           ))}
@@ -156,6 +205,140 @@ export default function CandidateMatches() {
           </p>
         )}
       </div>
+
+      {/* Schedule Interview Modal */}
+      {scheduleModalFor != null && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={scheduleSending ? undefined : closeScheduleModal}
+        >
+          <div
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 12,
+              padding: '1.5rem',
+              maxWidth: 400,
+              width: '90%',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 1rem', fontSize: '1.2rem' }}>Schedule & Send Email</h3>
+            <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              Choose date and time for the interview. An email with Accept/Reject will be sent to the interviewer.
+            </p>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.35rem', fontWeight: 500 }}>Date (required)</label>
+              <DatePicker
+                selected={scheduleDateObj}
+                onChange={(d) => {
+                  setScheduleDateObj(d)
+                  if (!d) setScheduleDate('')
+                  else {
+                    const pad = (n) => (n < 10 ? '0' + n : '' + n)
+                    setScheduleDate(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`)
+                  }
+                }}
+                onKeyDown={(e) => e.preventDefault()}
+                minDate={new Date()}
+                dateFormat="MMMM d, yyyy"
+                placeholderText="Select date"
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                className="schedule-datepicker"
+                calendarClassName="schedule-datepicker-calendar"
+                popperClassName="schedule-datepicker-popper"
+              />
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.35rem', fontWeight: 500 }}>Time (required)</label>
+              <DatePicker
+                selected={scheduleTimeObj}
+                onChange={(d) => {
+                  setScheduleTimeObj(d)
+                  if (!d) setScheduleTime('')
+                  else {
+                    const pad = (n) => (n < 10 ? '0' + n : '' + n)
+                    setScheduleTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`)
+                  }
+                }}
+                onKeyDown={(e) => e.preventDefault()}
+                showTimeSelect
+                showTimeSelectOnly
+                timeIntervals={15}
+                timeCaption="Time"
+                dateFormat="h:mm aa"
+                placeholderText="Select time"
+                className="schedule-datepicker schedule-timepicker"
+                calendarClassName="schedule-datepicker-calendar"
+                popperClassName="schedule-datepicker-popper"
+              />
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.35rem', fontWeight: 500 }}>Optional message</label>
+              <textarea
+                value={scheduleCustomMessage}
+                onChange={(e) => setScheduleCustomMessage(e.target.value)}
+                placeholder="Add a note for the interviewer…"
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                  background: 'var(--bg)',
+                  color: 'var(--text)',
+                  resize: 'vertical',
+                }}
+              />
+            </div>
+            {scheduleError && (
+              <p style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '0.9rem' }}>{scheduleError}</p>
+            )}
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={closeScheduleModal}
+                disabled={scheduleSending}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                  color: 'var(--text)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleScheduleAndSend}
+                disabled={scheduleSending}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: 'var(--accent)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontWeight: 500,
+                }}
+              >
+                {scheduleSending ? 'Sending…' : 'Schedule & Send'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

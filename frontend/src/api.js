@@ -70,7 +70,7 @@ export async function getMatches(candidateId) {
   return request(`/candidates/${candidateId}/matches`);
 }
 
-// Select interviewer and send email
+// Select interviewer and send email (legacy)
 export async function selectInterviewer(candidateId, interviewerId, sendEmail = true) {
   return request('/selection/select', {
     method: 'POST',
@@ -78,6 +78,20 @@ export async function selectInterviewer(candidateId, interviewerId, sendEmail = 
       candidate_id: candidateId,
       interviewer_id: interviewerId,
       send_email: sendEmail,
+    }),
+  });
+}
+
+// Schedule interview (date, time, optional message) and send email with Accept/Reject
+export async function scheduleInterview(candidateId, interviewerId, date, time, customMessage = null) {
+  return request('/selection/schedule', {
+    method: 'POST',
+    body: JSON.stringify({
+      candidate_id: candidateId,
+      interviewer_id: interviewerId,
+      date,
+      time,
+      custom_message: customMessage || null,
     }),
   });
 }
