@@ -103,6 +103,8 @@ frontend/
 
 ## Deploying to EC2
 
+**Full step-by-step:** See **[docs/EC2_DEPLOYMENT.md](docs/EC2_DEPLOYMENT.md)** for launching the instance, running `setup.sh`, configuring MySQL and `.env`, and starting the app.
+
 The GitHub workflow (`.github/workflows/deploy.yml`) syncs code to EC2 but **excludes** `backend/.env` for security. So S3 uploads and email **will not work** on EC2 until the server has a `backend/.env` file.
 
 **Option A – Manual:** SSH to EC2 and create `~/AI-Interviewer-Matching/backend/.env` with the same variables as locally (e.g. `DATABASE_URL`, `OPENAI_API_KEY`, `SMTP_*`, `EMAIL_FROM`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET`, `AWS_REGION`). Then restart the app (or redeploy).
