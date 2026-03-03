@@ -1,14 +1,17 @@
 import { Link } from 'react-router-dom'
+import logo from '../assets/images/Ix-logo.svg'
 
 export default function Layout({ children }) {
   return (
     <div style={styles.wrapper}>
       <header style={styles.header}>
-        <Link to="/" style={styles.logo}>AI Talent Acquisition Engine</Link>
+        <Link to="/" style={styles.logo} aria-label="AI Talent Acquisition Engine - Home">
+          <img src={logo} alt="AI Talent Acquisition Engine" style={styles.logoImg} />
+        </Link>
         <nav style={styles.nav}>
-          <Link to="/" style={styles.navLink}>Home</Link>
-          <Link to="/upload" style={styles.navLink}>Upload Resume</Link>
-          <Link to="/interviewers" style={styles.navLink}>Interviewers</Link>
+          <Link to="/" className="nav-link-app">Home</Link>
+          <Link to="/upload" className="nav-link-app">Upload Resume</Link>
+          <Link to="/interviewers" className="nav-link-app">Interviewers</Link>
         </nav>
       </header>
       <main style={styles.main}>
@@ -31,25 +34,27 @@ const styles = {
     padding: '1rem 2rem',
     background: 'var(--surface)',
     borderBottom: '1px solid var(--border)',
+    boxShadow: '0 1px 0 rgba(255,255,255,0.03)',
   },
   logo: {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    color: 'var(--text)',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  logoImg: {
+    height: 32,
+    width: 'auto',
+    display: 'block',
   },
   nav: {
     display: 'flex',
-    gap: '1.5rem',
-  },
-  navLink: {
-    color: 'var(--text-muted)',
-    fontSize: '0.95rem',
+    gap: '0.25rem',
   },
   main: {
     flex: 1,
-    padding: '2rem',
-    maxWidth: 900,
-    margin: '0 auto',
     width: '100%',
+    maxWidth: 1400,
+    margin: '0 auto',
+    padding: '1.25rem 1.5rem',
+    boxSizing: 'border-box',
   },
 }

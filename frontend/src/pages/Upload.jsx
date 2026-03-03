@@ -38,10 +38,12 @@ export default function Upload() {
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             style={styles.input}
           />
-          <span style={styles.fileLabel}>{file ? file.name : 'Choose file'}</span>
+          <span className="file-label-upload" style={styles.fileLabel}>
+            {file ? file.name : 'Choose file (PDF or .txt)'}
+          </span>
         </label>
         {error && <p style={styles.error}>{error}</p>}
-        <button type="submit" disabled={loading} style={styles.button}>
+        <button type="submit" disabled={loading} className="btn-primary" style={styles.button}>
           {loading ? 'Uploading & extracting…' : 'Upload & Match'}
         </button>
       </form>
@@ -50,28 +52,53 @@ export default function Upload() {
 }
 
 const styles = {
-  container: { maxWidth: 420, margin: '0 auto' },
-  title: { fontSize: '1.5rem', marginBottom: '0.5rem' },
-  subtitle: { color: 'var(--text-muted)', marginBottom: '1.5rem' },
-  form: { display: 'flex', flexDirection: 'column', gap: '1rem' },
-  label: { display: 'block' },
-  input: { display: 'none' },
+  container: {
+    maxWidth: 440,
+    margin: '0 auto',
+    paddingTop: '0.5rem',
+  },
+  title: {
+    fontSize: '1.6rem',
+    fontWeight: 700,
+    marginBottom: '0.5rem',
+    letterSpacing: '-0.02em',
+  },
+  subtitle: {
+    color: 'var(--text-muted)',
+    marginBottom: '1.75rem',
+    fontSize: '0.98rem',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.25rem',
+  },
+  label: {
+    display: 'block',
+  },
+  input: {
+    display: 'none',
+  },
   fileLabel: {
-    display: 'inline-block',
-    padding: '0.75rem 1rem',
+    display: 'block',
+    padding: '1.25rem 1.25rem',
     background: 'var(--surface)',
-    border: '1px solid var(--border)',
-    borderRadius: 8,
+    border: '2px dashed var(--border)',
+    borderRadius: 'var(--radius-lg)',
     cursor: 'pointer',
     color: 'var(--text-muted)',
+    fontSize: '0.95rem',
+    textAlign: 'center',
+    transition: 'border-color 0.2s ease, background 0.2s ease',
   },
-  error: { color: 'var(--danger)', fontSize: '0.9rem' },
+  error: {
+    color: 'var(--danger)',
+    fontSize: '0.9rem',
+    margin: 0,
+  },
   button: {
-    padding: '0.75rem 1.5rem',
-    background: 'var(--accent)',
-    color: 'white',
-    border: 'none',
-    borderRadius: 8,
-    fontWeight: 600,
+    padding: '0.85rem 1.5rem',
+    borderRadius: 'var(--radius-md)',
+    fontSize: '1rem',
   },
 }
