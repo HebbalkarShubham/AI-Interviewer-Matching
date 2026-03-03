@@ -1,0 +1,27 @@
+# MCP servers – run with: docker compose up -d
+# Microsoft 365: HTTP at http://localhost:3000/mcp
+# Zoho: stdio (use "docker compose run -i zoho-mcp" when a client needs to attach)
+
+services:
+  ms365-mcp:
+    build: ./ms365-mcp
+    image: ms365-mcp:latest
+    container_name: ms365-mcp
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./ms365-mcp/.env
+    environment:
+      - MS365_MCP_ORG_MODE=true
+    restart: unless-stopped
+
+  zoho-mcp:
+    build: ./zoho-mcp
+    image: zoho-mcp:latest
+    container_name: zoho-mcp
+    env_file:
+      - ./zoho-mcp/.env
+    stdin_open: true
+    tty: false
+    # To attach from host: docker compose run -i zoho-mcp
+    # Or run locally: .\run-server.ps1 (no Docker needed for Zoho)
