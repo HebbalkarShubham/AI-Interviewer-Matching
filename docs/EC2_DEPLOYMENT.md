@@ -180,9 +180,57 @@ nohup bash run.sh >> app.log 2>&1 &
 
 ---
 
+## 7a. Smooth deployment (systemd) — recommended for CI/CD
+
+If you use **GitHub Actions** to deploy, you can avoid manually restarting the app after each deploy by running the app as a **systemd service**. The workflow will then run `sudo systemctl restart ai-interviewer-matching` and the app will stay up.
+
+**One-time setup on EC2:**
+
+1. **Copy the service file** (use your actual user; below is for `ec2-user`; if Ubuntu, use `ubuntu` and change paths accordingly):
+
+   ```bash
+   sudo cp ~/AI-Interviewer-Matching/deploy/ai-interviewer-matching.service /etc/systemd/system/
+   ```
+
+2. **If you use Ubuntu** (user `ubuntu`), edit the unit file so paths and user are correct:
+
+   ```bash
+   sudo sed -i 's/ec2-user/ubuntu/g' /etc/systemd/system/ai-interviewer-matching.service
+   ```
+
+3. **Reload systemd, enable and start the service:**
+
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable ai-interviewer-matching
+   sudo systemctl start ai-interviewer-matching
+   ```
+
+4. **Allow the deploy user to restart the service without a password** (so GitHub Actions can run `sudo systemctl restart`):
+
+   ```bash
+   echo 'ec2-user ALL=(ALL) NOPASSWD: /bin/systemctl restart ai-interviewer-matching, /bin/systemctl start ai-interviewer-matching, /bin/systemctl daemon-reload' | sudo tee /etc/sudoers.d/99-ai-interviewer-matching
+   sudo chmod 440 /etc/sudoers.d/99-ai-interviewer-matching
+   ```
+
+   On **Ubuntu**, use `ubuntu` instead of `ec2-user` in the line above.
+
+5. **Check that the app is running:**
+
+   ```bash
+   sudo systemctl status ai-interviewer-matching
+   curl -s -o /dev/null -w "%{http_code}" http://localhost:8000
+   ```
+
+After this, every deploy from GitHub Actions will restart the app automatically — no SSH or manual `nohup` needed. View logs with: `journalctl -u ai-interviewer-matching -f`.
+
+---
+
 ## 8. Restart after code or config changes
 
-If you pull new code or change `.env`:
+**If you use systemd (section 7a):** the deploy workflow restarts the app. To restart manually: `sudo systemctl restart ai-interviewer-matching`.
+
+**If you run the app with nohup:** after pulling new code or changing `.env`:
 
 ```bash
 cd ~/AI-Interviewer-Matching
@@ -204,7 +252,8 @@ The repo has a workflow (`.github/workflows/deploy.yml`) that builds the fronten
    - **EC2_USER** (optional) – `ec2-user` (Amazon Linux) or `ubuntu` (Ubuntu). Default is `ec2-user`.
    - **EC2_ENV_FILE** (optional) – Base64 of your `backend/.env` so the workflow can write it on the server (S3 and email will work after each deploy).
 
-3. Push to `main` or run the workflow manually from the **Actions** tab. The workflow will sync code and restart the app; the app will be at **http://\<EC2_HOST\>:8000**.
+3. Push to `main` or run the workflow manually from the **Actions** tab. The workflow will sync code and restart the app; the app will be at **http://\<EC2_HOST\>:8000**.  
+   For **automatic restart** on each deploy (no manual step), complete the **systemd one-time setup** in section **7a** above.
 
 ---
 

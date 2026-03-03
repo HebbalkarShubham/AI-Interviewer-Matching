@@ -1,0 +1,11 @@
+# Allow deploy user to restart the app without a password (required for CI/CD).
+# One-time: create a file under /etc/sudoers.d/ (e.g. 99-ai-interviewer-matching) with:
+#
+# For Amazon Linux (ec2-user):
+#   ec2-user ALL=(ALL) NOPASSWD: /bin/systemctl restart ai-interviewer-matching, /bin/systemctl start ai-interviewer-matching, /bin/systemctl daemon-reload
+#
+# For Ubuntu:
+#   ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl restart ai-interviewer-matching, /bin/systemctl start ai-interviewer-matching, /bin/systemctl daemon-reload
+#
+# Then: sudo chmod 440 /etc/sudoers.d/99-ai-interviewer-matching
+# Do not add a trailing newline after the line (some sudo versions require that).

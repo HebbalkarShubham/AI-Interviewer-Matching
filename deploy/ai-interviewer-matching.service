@@ -1,0 +1,24 @@
+# Systemd unit for AI Interviewer Matching (FastAPI on port 8000).
+# One-time setup: copy to /etc/systemd/system/, edit User and paths if using Ubuntu, then:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable ai-interviewer-matching
+#   sudo systemctl start ai-interviewer-matching
+# After that, the GitHub Actions deploy workflow can restart the app with:
+#   sudo systemctl restart ai-interviewer-matching
+
+[Unit]
+Description=AI Interviewer Matching (FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/ec2-user/AI-Interviewer-Matching
+ExecStart=/home/ec2-user/AI-Interviewer-Matching/run.sh
+Restart=on-failure
+RestartSec=5
+# .env is loaded by run.sh from backend/
+
+[Install]
+WantedBy=multi-user.target

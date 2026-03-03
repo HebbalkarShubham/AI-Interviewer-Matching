@@ -95,8 +95,12 @@ jobs:
           fi
 
           echo "Restarting app on EC2..."
-          if ! ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "$USER@$EC2_HOST" \
-            "cd ~/AI-Interviewer-Matching && (pkill -f 'uvicorn app.main:app' || true); sleep 2; nohup bash run.sh >> app.log 2>&1 </dev/null & disown"; then
-            echo "::warning::Restart command failed (exit 255). Code was synced. SSH to EC2 and run: cd AI-Interviewer-Matching && nohup bash run.sh >> app.log 2>&1 &"
+          if ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "$USER@$EC2_HOST" "sudo systemctl restart ai-interviewer-matching" 2>/dev/null; then
+            echo "App restarted via systemd (ai-interviewer-matching.service)."
+          else
+            echo "Systemd service not used; starting app in background..."
+            ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "$USER@$EC2_HOST" \
+              "cd ~/AI-Interviewer-Matching && (pkill -f 'uvicorn app.main:app' || true); sleep 2; nohup bash run.sh >> app.log 2>&1 </dev/null & disown" || true
+            echo "::notice::For smooth deploys (no manual restart), set up systemd once on EC2. See docs/EC2_DEPLOYMENT.md section 'Smooth deployment (systemd)'."
           fi
           echo "Deploy done. App at http://$EC2_HOST:8000"
