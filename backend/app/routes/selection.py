@@ -1,5 +1,6 @@
 # Select interviewer and send email; schedule interview (date/time) and send with Accept/Reject
 from datetime import date, time, datetime, timedelta, timezone
+from typing import Optional
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -27,7 +28,7 @@ class ScheduleInterviewRequest(BaseModel):
     interviewer_id: int
     date: str  # YYYY-MM-DD
     time: str  # HH:mm or HH:mm:ss
-    custom_message: str | None = None
+    custom_message: Optional[str] = None
 
     @field_validator("date")
     @classmethod
