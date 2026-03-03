@@ -210,9 +210,33 @@ The repo has a workflow (`.github/workflows/deploy.yml`) that builds the fronten
 
 ## Troubleshooting
 
+### "This site can't be reached" / ERR_CONNECTION_REFUSED
+
+If the instance is running and the deploy workflow succeeded but **http://\<EC2_IP\>:8000** refuses the connection:
+
+1. **Security group (most common)**  
+   In EC2 → your instance → **Security** tab → security group → **Edit inbound rules**.  
+   Ensure there is a rule: **Type** = Custom TCP, **Port** = **8000**, **Source** = `0.0.0.0/0` (or your IP). Save. Without this, traffic to port 8000 never reaches the instance.
+
+2. **App not running on the instance**  
+   The workflow restarts the app over SSH; if that step fails, the job can still succeed (you may see a warning in the workflow run). SSH into the instance and run:
+   ```bash
+   # Is the app process running?
+   pgrep -af uvicorn
+
+   # Can the server reach itself on 8000?
+   curl -s -o /dev/null -w "%{http_code}" http://localhost:8000
+   ```
+   If `pgrep` shows nothing or `curl` fails, the app isn’t running. Start it and then check the log:
+   ```bash
+   cd ~/AI-Interviewer-Matching && nohup bash run.sh >> app.log 2>&1 &
+   tail -50 app.log
+   ```
+   Fix any errors in `app.log` (e.g. missing `backend/.env`, wrong `DATABASE_URL`, Python/import errors).
+
 | Issue | What to check |
 |-------|----------------|
-| **Can’t open http://IP:8000** | Security group: allow inbound TCP **8000** from `0.0.0.0/0` (or your IP). |
+| **Can’t open http://IP:8000** | Security group: allow inbound TCP **8000** from `0.0.0.0/0` (or your IP). Then confirm the app is running (see above). |
 | **SSH connection refused** | Security group: allow inbound **22** from your IP. |
 | **“Run setup.sh first”** | Run `bash setup.sh` from project root; ensure `backend/venv` exists. |
 | **Database connection error** | Check `DATABASE_URL` in `backend/.env`; ensure MySQL is running (`sudo systemctl status mysql` or `mariadb`). |
