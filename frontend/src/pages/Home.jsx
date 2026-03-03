@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 export default function Home() {
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>AI Interviewer Matching System</h1>
+      <h1 style={styles.title}>AI Talent Acquisition Engine</h1>
       <p style={styles.subtitle}>
         Upload a resume to extract skills and get matched with the best interviewers.
       </p>

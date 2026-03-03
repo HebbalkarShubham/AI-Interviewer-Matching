@@ -3,17 +3,18 @@ import { useParams } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { getCandidate, getMatches, scheduleInterview } from '../api'
+import Modal from '../components/Modal'
 
 export default function CandidateMatches() {
   const { id } = useParams()
   const [candidate, setCandidate] = useState(null)
   const [matches, setMatches] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [scheduleModalFor, setScheduleModalFor] = useState(null) // interviewer id when modal open
   const [scheduleSending, setScheduleSending] = useState(false)
   const [scheduleError, setScheduleError] = useState('')
-  const [message, setMessage] = useState('')
+  const [successModalMessage, setSuccessModalMessage] = useState(null)
+  const [errorModalMessage, setErrorModalMessage] = useState(null)
   const [search, setSearch] = useState('')
   // Form state for schedule modal (select only, no typing)
   const [scheduleDate, setScheduleDate] = useState('')
@@ -39,7 +40,7 @@ export default function CandidateMatches() {
         setCandidate(c)
         setMatches(m)
       } catch (err) {
-        setError(err.message || 'Failed to load')
+        setErrorModalMessage(err.message || 'Failed to load')
       } finally {
         setLoading(false)
       }
@@ -59,6 +60,13 @@ export default function CandidateMatches() {
   function closeScheduleModal() {
     setScheduleModalFor(null)
     setScheduleError('')
+  }
+
+  function clearSuccessModal() {
+    setSuccessModalMessage(null)
+  }
+  function clearErrorModal() {
+    setErrorModalMessage(null)
   }
 
   function getTodayISO() {
@@ -90,22 +98,32 @@ export default function CandidateMatches() {
         scheduleTime,
         scheduleCustomMessage.trim() || null
       )
-      setMessage(
+      setSuccessModalMessage(
         res.email_sent
           ? `Interview scheduled for ${res.date} at ${res.time}. Email sent to ${res.interviewer_email}.`
           : `Interview scheduled for ${res.date} at ${res.time}. (Email not sent - check SMTP config.)`
       )
       closeScheduleModal()
     } catch (err) {
-      setScheduleError(err.message || 'Failed to schedule')
+      closeScheduleModal()
+      setErrorModalMessage(err.message || 'Failed to schedule')
     } finally {
       setScheduleSending(false)
     }
   }
 
   if (loading) return <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
-  if (error) return <p style={{ color: 'var(--danger)' }}>{error}</p>
-  if (!candidate) return null
+  if (!candidate) {
+    if (errorModalMessage) {
+      return (
+        <>
+          <Modal variant="error" title="Error" message={errorModalMessage} onClose={clearErrorModal} />
+          <p style={{ color: 'var(--danger)' }}>Failed to load. Go back to candidates.</p>
+        </>
+      )
+    }
+    return null
+  }
 
   const cardStyle = {
     background: 'var(--surface)',
@@ -167,7 +185,6 @@ export default function CandidateMatches() {
             aria-label="Search matched interviewers"
           />
         </div>
-        {message && <p style={{ color: 'var(--success)', marginBottom: '1rem' }}>{message}</p>}
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {filteredMatches.map((m, rank) => (
             <li key={m.interviewer_id} style={cardStyle}>
@@ -338,6 +355,26 @@ export default function CandidateMatches() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Success modal when email is sent */}
+      {successModalMessage && (
+        <Modal
+          variant="success"
+          title="Email sent"
+          message={successModalMessage}
+          onClose={clearSuccessModal}
+        />
+      )}
+
+      {/* Error modal for any error */}
+      {errorModalMessage && (
+        <Modal
+          variant="error"
+          title="Error"
+          message={errorModalMessage}
+          onClose={clearErrorModal}
+        />
       )}
     </div>
   )

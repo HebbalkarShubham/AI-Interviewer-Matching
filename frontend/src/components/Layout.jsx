@@ -4,7 +4,7 @@ export default function Layout({ children }) {
   return (
     <div style={styles.wrapper}>
       <header style={styles.header}>
-        <Link to="/" style={styles.logo}>AI Interviewer Matching</Link>
+        <Link to="/" style={styles.logo}>AI Talent Acquisition Engine</Link>
         <nav style={styles.nav}>
           <Link to="/" style={styles.navLink}>Home</Link>
           <Link to="/upload" style={styles.navLink}>Upload Resume</Link>
