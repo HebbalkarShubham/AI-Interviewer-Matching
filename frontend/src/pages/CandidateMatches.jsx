@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { getCandidate, getMatches, scheduleInterview } from '../api'
 import Modal from '../components/Modal'
+import { formatSkillsString, formatSkillLabel } from '../utils/skillsFormat'
 
 export default function CandidateMatches() {
   const { id } = useParams()
@@ -143,6 +144,11 @@ export default function CandidateMatches() {
 
   return (
     <div>
+      {candidate?.name && (
+        <p style={{ margin: '0 0 0.25rem', fontSize: '0.95rem', color: 'var(--text-muted)' }}>
+          Candidate Name: <strong style={{ color: 'var(--text)' }}>{candidate.name.replace(/\b\w/g, (c) => c.toUpperCase())}</strong>
+        </p>
+      )}
       <h1 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>Candidate Match Results</h1>
       <div style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Extracted skills</h2>
@@ -194,9 +200,9 @@ export default function CandidateMatches() {
               </div>
               <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 600 }}>{m.name}</h3>
               <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>{m.email}</p>
-              <p style={{ margin: '0.5rem 0', fontSize: '0.9rem' }}><strong>Skills:</strong> {m.skills}</p>
+              <p style={{ margin: '0.5rem 0', fontSize: '0.9rem' }}><strong>Skills:</strong> {formatSkillsString(m.skills)}</p>
               {m.matched_skills?.length > 0 && (
-                <p style={{ margin: '0.25rem 0', fontSize: '0.85rem', color: 'var(--accent)' }}>Matched: {m.matched_skills.join(', ')}</p>
+                <p style={{ margin: '0.25rem 0', fontSize: '0.85rem', color: 'var(--accent)' }}>Matched: {m.matched_skills.map(formatSkillLabel).join(', ')}</p>
               )}
               {m.explanation && <p style={explanationStyle}>{m.explanation}</p>}
               <button

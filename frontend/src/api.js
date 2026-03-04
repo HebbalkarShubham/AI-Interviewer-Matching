@@ -66,8 +66,9 @@ export async function getCandidate(id) {
   return request(`/candidates/${id}`);
 }
 
-export async function getMatches(candidateId) {
-  return request(`/candidates/${candidateId}/matches`);
+export async function getMatches(candidateId, level = null) {
+  const q = level != null && level !== '' ? `?level=${encodeURIComponent(level)}` : '';
+  return request(`/candidates/${candidateId}/matches${q}`);
 }
 
 // Select interviewer and send email (legacy)

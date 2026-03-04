@@ -4,6 +4,7 @@ import { uploadResume } from '../api'
 
 export default function Upload() {
   const [file, setFile] = useState(null)
+  const [level, setLevel] = useState('') // Interviewer level: '', L1, L2 (not stored in DB)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -18,7 +19,7 @@ export default function Upload() {
     setLoading(true)
     try {
       const candidate = await uploadResume(file)
-      navigate(`/candidate/${candidate.id}`)
+      navigate(`/candidate/${candidate.id}`, { state: { levelFilter: level || null } })
     } catch (err) {
       setError(err.message || 'Upload failed')
     } finally {
@@ -32,6 +33,21 @@ export default function Upload() {
       <p style={styles.subtitle}>We'll extract name, email, and skills from your resume. PDF or text.</p>
       <form onSubmit={handleSubmit} style={styles.form}>
         <label style={styles.label}>
+          <span style={styles.fieldLabel}>Interviewer level</span>
+          <select
+            value={level}
+            onChange={(e) => setLevel(e.target.value)}
+            style={styles.select}
+            aria-label="Interviewer level filter for matches"
+          >
+            <option value="L1">L1</option>
+            <option value="L2">L2</option>
+            <option value="L3">L3</option>
+            <option value="L4">L4</option>
+          </select>
+        </label>
+        <label style={styles.label}>
+          <span style={styles.fieldLabel}>Resume file</span>
           <input
             type="file"
             accept=".pdf,.txt"
@@ -75,6 +91,23 @@ const styles = {
   },
   label: {
     display: 'block',
+  },
+  fieldLabel: {
+    display: 'block',
+    fontSize: '0.9rem',
+    fontWeight: 600,
+    color: 'var(--text-muted)',
+    marginBottom: '0.4rem',
+  },
+  select: {
+    width: '100%',
+    padding: '0.65rem 0.9rem',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-sm)',
+    color: 'var(--text)',
+    fontSize: '1rem',
+    cursor: 'pointer',
   },
   input: {
     display: 'none',

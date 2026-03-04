@@ -20,9 +20,14 @@ from app.models import Interviewer
 router = APIRouter(prefix="/candidates", tags=["candidates"])
 
 
-def _load_interviewers_with_skills(db: Session) -> list:
-    """Load interviewers with skills relationship for candidate matching."""
-    return db.query(Interviewer).options(joinedload(Interviewer.skills)).all()
+def _load_interviewers_with_skills(db: Session, level: Optional[str] = None) -> list:
+    """Load interviewers with skills relationship for candidate matching.
+    If level is provided (e.g. L1, L2), only return interviewers with that level.
+    """
+    q = db.query(Interviewer).options(joinedload(Interviewer.skills))
+    if level is not None and level.strip():
+        q = q.filter(Interviewer.level == level.strip())
+    return q.all()
 
 
 def candidate_to_response(c: Candidate) -> CandidateResponse:
@@ -115,14 +120,19 @@ def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/{candidate_id}/matches", response_model=List[MatchResult])
-def get_matches(candidate_id: int, db: Session = Depends(get_db)):
+def get_matches(
+    candidate_id: int,
+    level: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
     """
     Get ranked list of interviewers matched to this candidate.
+    Optional level filter (e.g. L1, L2): only interviewers with that level are returned.
     Returns score (0-100), matched skills, and AI explanation per interviewer.
     """
     candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
     if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
-    interviewers = _load_interviewers_with_skills(db)
+    interviewers = _load_interviewers_with_skills(db, level=level)
     results = get_ranked_matches(candidate, interviewers, include_explanation=True)
     return [MatchResult(**r) for r in results]

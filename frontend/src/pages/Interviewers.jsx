@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getInterviewers, createInterviewer, updateInterviewer, deleteInterviewer } from '../api'
+import { formatSkillsString } from '../utils/skillsFormat'
 
 function skillsStringToPayload(skillsStr) {
   if (!skillsStr || !String(skillsStr).trim()) return []
@@ -200,7 +201,7 @@ export default function Interviewers() {
                   <td style={styles.cellName}>{inv.name}</td>
                   <td style={styles.cellEmail}>{inv.email}</td>
                   <td style={styles.cellSkills}>
-                    {Array.isArray(inv.skills) ? inv.skills.map(s => s.skill_name).join(', ') : (inv.skills || '—')}
+                    {formatSkillsString(Array.isArray(inv.skills) ? inv.skills.map(s => s.skill_name).join(', ') : (inv.skills || '')) || '—'}
                   </td>
                   <td>{inv.level || '—'}</td>
                   <td>{inv.experience_range || '—'}</td>
